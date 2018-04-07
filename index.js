@@ -1,6 +1,7 @@
 'use strict';
 
 const fs = require('fs');
+const cors = require('cors');
 // Creates .env file with defaults if it does not exist.
 let env = '.env';
 if (!fs.existsSync(env)) {
@@ -11,8 +12,12 @@ require('dotenv').config();
 const express = require('express');
 const PORT = process.env.PORT;
 const app = express();
+app.use(cors);
 
-// app.post('/heartbeat', function (req, res) {
+var heartbeat;
+
+
+// app.get('/heartbeat', function (req, res) {
 //   if(req.query.id){
 //     // let id = req.query.id;
 //     if('signal is ALIVE') {
@@ -21,33 +26,68 @@ const app = express();
 //   } else {//if signal is DEAD
 //     res.send('Server Is Not Responding!');
 //   };
-let heartbeat = false;
-app.get('/heartbeat', function (req, res) {
+// let heartbeat = false;
+
+app.post('/heartbeat', function (req, res) {
   if(req.query.id){
+    // let heartbeat = req.body.heartbeat;
+    // setTime();
     // let id = req.query.id;
-    if(heartbeat !== false) {
-      res.sendFile(__dirname + '/public/index.html');
+    if(heartbeat === false) {
+      res.send('Server Is Not Responding!');
     }
   } else {//if signal is DEAD
-    res.send('Server Is Not Responding!');
+    setTime();
+    res.sendFile(__dirname + '/public/index.html');
   }; 
 });
 
 // let date = new Date();
-var enabled = true;
-var disabled = false;
+// var enabled = true;
+// var disabled = false;
 
-var heartbeat;//TEST
-heartbeat = enabled;//TEST
+// var heartbeat;//TEST
+// heartbeat = enabled;//TEST
 
 setInterval(function(){
-  if(heartbeat === enabled) {
+  if(heartbeat === true) {
     console.log('true');
   }
-  if(heartbeat === disabled) {
+  if(heartbeat === false) {
     console.log('false');
   }
 }, 1000);
+
+let currentTime = [];
+let resetTime = [];
+
+function setTime() {
+  currentTime = new Date().getTime();
+  heartbeat = true;
+  resetTime = currentTime + (1000 * 10);
+};
+setTime();
+
+setInterval(function(){
+  currentTime = new Date().getTime();
+  console.log('Time left: ', resetTime - currentTime);
+  if (resetTime < currentTime) {
+    heartbeat = false;
+  };
+  console.log(heartbeat);
+  // app.post('/heartbeat', function (req, res) {
+  //   if(req.query.id){
+  //     // setTime();
+  //     // let id = req.query.id;
+  //     if(heartbeat !== false) {
+  //       setTime();
+  //       res.sendFile(__dirname + '/public/index.html');
+  //     }
+  //   } else {//if signal is DEAD
+  //     res.send('Server Is Not Responding!');
+  //   }; 
+  // });
+}, 1000 * 3);
 
 
 
