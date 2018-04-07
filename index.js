@@ -12,8 +12,27 @@ const express = require('express');
 const PORT = process.env.PORT;
 const app = express();
 
-app.get('/', function (req, res) {
-  res.sendFile(__dirname + '/public/index.html');
+// app.post('/heartbeat', function (req, res) {
+//   if(req.query.id){
+//     // let id = req.query.id;
+//     if('signal is ALIVE') {
+//       res.sendFile(__dirname + '/public/index.html');
+//     }
+//   } else {//if signal is DEAD
+//     res.send('Server Is Not Responding!');
+//   };
+
+app.get('/heartbeat', function (req, res) {
+  if(req.query.id){
+    // let id = req.query.id;
+    if('signal is ALIVE') {
+      res.sendFile(__dirname + '/public/index.html');
+    }
+  } else {//if signal is DEAD
+    res.send('Server Is Not Responding!');
+  };
+ 
+
 });
 
 app.listen(process.env.PORT, () => {
