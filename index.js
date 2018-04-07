@@ -56,6 +56,7 @@ setInterval(function(){
     heartbeat = false;
   };
   console.log(heartbeat);
+  io.sockets.emit('status', heartbeat);
 }, 1000 * 1);
 
 
