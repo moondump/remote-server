@@ -1,5 +1,6 @@
 'use strict';
 
+// https://shiot-remote-server.herokuapp.com/
 const fs = require('fs');
 // Creates .env file with defaults if it does not exist.
 let env = '.env';
