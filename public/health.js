@@ -1,7 +1,8 @@
 'use strict';
 
 //Make connection
-const socket = io.connect('http://localhost:3002');
+// const socket = io.connect('http://localhost:3002');
+const socket = io.connect('https://shiot-remote-server.herokuapp.com/');
 
 // Query DOM
 let deviceStatus = document.getElementById('deviceStatus');
