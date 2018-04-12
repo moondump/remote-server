@@ -12,6 +12,7 @@ require('dotenv').config();
 const express = require('express');
 const socket = require('socket.io');
 const cors = require('cors');
+var nodemailer = require('nodemailer');
 const PORT = process.env.PORT;
 const app = express();
 app.use(cors());
@@ -26,22 +27,23 @@ app.get('/ping', (req, res) => {
 });
 
 app.post('/heartbeat', function (req, res) {
-  if(req.query.id){
+  if (req.query.id) {
     let heartbeat = req.body.heartbeat;
     setTime();
     // let id = req.query.id;
-    if(heartbeat === false) {
+    if (heartbeat === false) {
       res.send('Server Is Not Responding!');
     }
   } else {//if signal is DEAD
     setTime();
     res.sendFile(__dirname + '/public/index.html');
-  }; 
+  };
 });
 
 let currentTime = [];
 let resetTime = [];
 let timeout = 5; //time in seconds.
+let heartCheck = 10; //how often to check heartbeat status.
 
 function setTime() {
   currentTime = new Date().getTime();
@@ -50,15 +52,44 @@ function setTime() {
 };
 setTime();
 
-setInterval(function(){
+setInterval(function () {
   currentTime = new Date().getTime();
   // console.log ('Time left:', Math.round(resetTime / 1000) - Math.round(currentTime / 1000));
   if (resetTime < currentTime) {
     heartbeat = false;
   };
+  if (!heartbeat) {
+    sysDown();
+  };
   console.log(heartbeat);
   io.sockets.emit('status', heartbeat);
-}, 1000 * 1);
+}, 1000 * heartCheck);
+
+// node mailer
+function sysDown() {
+  var transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+      user: process.env.EMAIL,
+      pass: process.env.EMAIL_PASS
+    }
+  });
+
+  var mailOptions = {
+    from: process.env.EMAIL,
+    to: process.env.EMAIL,
+    subject: 'SHIoT Device Status',
+    text: 'Device has gone down!'
+  };
+
+  transporter.sendMail(mailOptions, function (error, info) {
+    if (error) {
+      console.log(error);
+    } else {
+      console.log('Email sent: ' + info.response);
+    }
+  });
+};
 
 
 
@@ -68,7 +99,7 @@ const server = app.listen(process.env.PORT, () => {
 
 const io = socket(server);
 
-io.on('connection', function(socket){
+io.on('connection', function (socket) {
   console.log('made socket connection', socket.id);
   io.emit('status', heartbeat);
 
