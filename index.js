@@ -18,6 +18,7 @@ const app = express();
 app.use(cors());
 
 var heartbeat;
+var count = 0;
 
 // static files
 app.use(express.static('public'));
@@ -37,9 +38,11 @@ app.post('/heartbeat', function (req, res) {
   } else {//if signal is DEAD
     setTime();
     res.sendFile(__dirname + '/public/index.html');
+    count = 0;
+    console.log(`Heartbeat Is Now: ${heartbeat}`);
+    console.log(`Count Is Now: ${count}`);
   };
 });
-
 let currentTime = [];
 let resetTime = [];
 let timeout = 5; //time in seconds.
@@ -54,12 +57,19 @@ setTime();
 
 setInterval(function () {
   currentTime = new Date().getTime();
-  // console.log ('Time left:', Math.round(resetTime / 1000) - Math.round(currentTime / 1000));
+  console.log ('Time Left:', Math.round(resetTime / 1000) - Math.round(currentTime / 1000));
   if (resetTime < currentTime) {
     heartbeat = false;
   };
   if (!heartbeat) {
-    sysDown();
+    if (count < 1){
+      count++;
+      sysDown();
+    } else {
+      console.log(`Heartbeat Is: ${heartbeat}`);
+      console.log(`Count Is: ${count}`);
+      return;
+    };
   };
   console.log(heartbeat);
   io.sockets.emit('status', heartbeat);
@@ -79,14 +89,14 @@ function sysDown() {
     from: process.env.EMAIL,
     to: process.env.EMAIL,
     subject: 'SHIoT Device Status',
-    text: 'Device has gone down!'
+    text: 'Device Has Gone Down!'
   };
 
   transporter.sendMail(mailOptions, function (error, info) {
     if (error) {
       console.log(error);
     } else {
-      console.log('Email sent: ' + info.response);
+      console.log(`Email Sent: ${info.response}`);
     }
   });
 };
