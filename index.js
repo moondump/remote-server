@@ -62,7 +62,7 @@ setInterval(function () {
     heartbeat = false;
   };
   if (!heartbeat) {
-    if (count < 1){
+    if(count < 1) {
       count++;
       sysDown();
     } else {
